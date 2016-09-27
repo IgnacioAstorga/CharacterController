@@ -92,9 +92,15 @@ public class CharacterController3D : MonoBehaviour {
 		if (Grounded)
 			Velocity = Vector3.MoveTowards(Velocity, _inputVelocity, groundAcceleration * Time.deltaTime);
 		else if (_inputVelocity != Vector3.zero) {
-			Vector3 projection = Vector3.Project(Velocity, _inputVelocity);
-			projection = Vector3.ClampMagnitude(projection, Velocity.magnitude);
-			Velocity = Vector3.MoveTowards(Velocity, Velocity + _inputVelocity - projection, airAcceleration * Time.deltaTime);
+			Vector3 planarVelocity = Vector3.ProjectOnPlane(Velocity, _transform.up);
+			Vector3 projection = Vector3.Project(planarVelocity, _inputVelocity);
+			Vector3 newVelocity = Velocity;
+			if (projection.sqrMagnitude > maxSpeed + maxSpeed && Vector3.Dot(projection, _inputVelocity) > 0) {
+				newVelocity += Vector3.ProjectOnPlane(_inputVelocity, planarVelocity);
+			}
+			else
+				newVelocity += _inputVelocity;
+			Velocity = Vector3.MoveTowards(Velocity, newVelocity, airAcceleration * Time.deltaTime);
 		}
 
 		// Jump
