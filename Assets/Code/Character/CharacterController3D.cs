@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 
 [RequireComponent(typeof(CharacterController))]
-public class CharacterController3D : MonoBehaviour {
+public class CharacterController3D : NetworkBehaviour {
 
 	public Vector3 Velocity { get; set; }
 	public bool Grounded { get; private set; }
@@ -41,15 +42,24 @@ public class CharacterController3D : MonoBehaviour {
 		_headAngle = head.eulerAngles.y;
 	}
 
+	public override void OnStartLocalPlayer() {
+		// Enables the camera on the local player
+		head.GetComponentInChildren<Camera>(true).gameObject.SetActive(true);
+	}
+
 	void Update() {
-		ReadInput();
-		UpdateVelocity();
+		if (isLocalPlayer) {
+			ReadInput();
+			UpdateVelocity();
+		}
 	}
 
 	void FixedUpdate() {
-		ResetState();
-		ApplyPhysics();
-		Move();
+		if (isLocalPlayer) {
+			ResetState();
+			ApplyPhysics();
+			Move();
+		}
 	}
 
 	private void ReadInput() {
